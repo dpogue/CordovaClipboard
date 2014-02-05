@@ -8,9 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.content.Context;
-import android.content.ClipboardManager;
-import android.content.ClipData;
-import android.content.ClipDescription;
+import android.os.Build;
 
 public class Clipboard extends CordovaPlugin {
 
@@ -19,14 +17,24 @@ public class Clipboard extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        ClipboardManager clipboard = (ClipboardManager) cordova.getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        Object board = cordova.getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
 
-        if (action.equals(actionCopy)) {
+        if (action.equals(actionCopy))
+        {
             try {
                 String text = args.getString(0);
-                ClipData clip = ClipData.newPlainText("Text", text);
 
-                clipboard.setPrimaryClip(clip);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                {
+                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager)board;
+                    android.content.ClipData clip = android.content.ClipData.newPlainText("Text", text);
+                    clipboard.setPrimaryClip(clip);
+                }
+                else
+                {
+                    android.text.ClipboardManager clipboard = (android.text.ClipboardManager)board;
+                    clipboard.setText(text);
+                }
 
                 callbackContext.success(text);
 
@@ -36,14 +44,30 @@ public class Clipboard extends CordovaPlugin {
             } catch (Exception e) {
                 callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
             }
-        } else if (action.equals(actionPaste)) {
-            if (!clipboard.getPrimaryClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.NO_RESULT));
-            }
-
+        }
+        else if (action.equals(actionPaste))
+        {
             try {
-                ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
-                String text = (String) item.getText();
+
+                String text = null;
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                {
+                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager)board;
+
+                    if (!clipboard.getPrimaryClipDescription().hasMimeType(android.content.ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.NO_RESULT));
+                        return true;
+                    }
+
+                    android.content.ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+                    text = item.getText().toString();
+                }
+                else
+                {
+                    android.text.ClipboardManager clipboard = (android.text.ClipboardManager)board;
+                    text = (String)clipboard.getText();
+                }
 
                 if (text == null) text = "";
 
