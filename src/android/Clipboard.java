@@ -9,6 +9,7 @@ import org.json.JSONException;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 public class Clipboard extends CordovaPlugin {
 
@@ -51,8 +52,11 @@ public class Clipboard extends CordovaPlugin {
 
                 String text = null;
 
+                Log.v("Clipboard", "Calling paste");
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
                 {
+                    Log.v("Clipboad", ">= Honeycomb");
                     android.content.ClipboardManager clipboard = (android.content.ClipboardManager)board;
 
                     if (!clipboard.getPrimaryClipDescription().hasMimeType(android.content.ClipDescription.MIMETYPE_TEXT_PLAIN)) {
@@ -65,16 +69,20 @@ public class Clipboard extends CordovaPlugin {
                 }
                 else
                 {
+                    Log.v("Clipboad", "< Honeycomb");
                     android.text.ClipboardManager clipboard = (android.text.ClipboardManager)board;
                     text = (String)clipboard.getText();
                 }
 
                 if (text == null) text = "";
 
+                Log.v("Clipboad", text);
+
                 callbackContext.success(text);
 
                 return true;
             } catch (Exception e) {
+                Log.v("Clipboard", Log.getStackTraceString(e));
                 callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
             }
         }

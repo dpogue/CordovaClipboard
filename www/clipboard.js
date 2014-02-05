@@ -16,7 +16,7 @@ function Clipboard () {}
  */
 Clipboard.prototype.copy = function (text, onSuccess, onFail) {
     if (typeof text === "undefined" || text === null) text = "";
-	cordova.exec(onSuccess, onFail, "Clipboard", "copy", [text]);
+    cordova.exec(onSuccess, onFail, "Clipboard", "copy", [text]);
 };
 
 /**
@@ -26,7 +26,7 @@ Clipboard.prototype.copy = function (text, onSuccess, onFail) {
  * @param {Function} onFail    The function to call in case of error
  */
 Clipboard.prototype.paste = function (onSuccess, onFail) {
-	cordova.exec(onSuccess, onFail, "Clipboard", "paste", []);
+    cordova.exec(onSuccess, onFail, "Clipboard", "paste", []);
 };
 
 // Register the plugin
